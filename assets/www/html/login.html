@@ -17,50 +17,85 @@
 		<h1>MTB</h1>
 	</div><!-- /header -->
 	<div role="main" data-theme="b" id="content" class="ui-content">
-		<h3>로그인</h3>
-		<label for="id">ID입력</label>
-		<input type="text" name="id" id="id" data-theme="a" data-clear-btn="true">
-		<label for="password">Password입력</label>
-		<input type="password" name="password" id="password" data-theme="a" data-clear-btn="true">
-		<a href="#" data-rel="popup" data-transition="pop" data-position-to="window" id="btn-submit" class="ui-btn ui-btn-b ui-corner-all mc-top-margin-1-5">로그인</a>
-		<p class="mc-top-margin-1-5"><a href="begin-password-reset.html">ID/Password 찾기</a></p>
-		<div data-role="popup" id="dlg-invalid-credentials" data-dismissible="false" style="max-width:400px;">
-			<div role="main" class="ui-content">
-				<h3 class="mc-text-danger">로그인실패</h3>
-				<div class="mc-text-center"><a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-b mc-top-margin-1-5">OK</a></div>
-			</div>
-		</div>
+		<img src="../img/logo.png" alt="로고"/>
 	</div><!-- /content -->
 </div><!-- /page -->
 <script>
+		var id;
+   		var password;
+		var db;
    		$(function(){
-   			var id;
-   			var password;
-   			if(localStorage.id != null) {
-   				id = localStorage.id;
-   				password = localStorage.password;
-   				member.login(id, password);
-   			}
-   			$('#btn-submit').click(function(){
-   				id = $('#id').val();
-   				password = $('#password').val();
-   				member.login(id, password);
-   			});
+   			var shortName = "fkod";
+   			var version = "1.0";
+   			var displayName = "fkod";
+   			var maxSize = 65536;
+   			db = openDatabase(shortName, version, displayName, maxSize);
+   			db.transaction(
+   				function(transaction){
+   					transaction.executeSql(
+						'CREATE TABLE IF NOT EXISTS entries ' +
+						'(id TEXT NOT NULL PRIMARY KEY,' +
+						'	password TEXT NOT NULL);'
+   					)
+   				}
+   			);
+   			db.transaction(
+   				function(transaction) {
+   					transaction.executeSql(
+   						'SELECT * FROM entries;',[],
+   						function(transaction, result) {
+   							if(result.rows.length!=0) {
+   								var row = result.rows.item(0);
+   								id = row.id;
+   								password = row.password;
+   								alert(id);
+   								alert(password);
+   								if(id != null && password != null) {
+   									member.login(id, password);
+   								}
+   							} else {
+   								$("#content").html(
+   									'<h3>로그인</h3>'+
+									'<label for="id">ID입력</label>'+
+									'<input type="text" name="id" id="id" data-theme="a" data-clear-btn="true">'+
+									'<label for="password">Password입력</label>'+
+									'<input type="password" name="password" id="password" data-theme="a" data-clear-btn="true">'+
+									'<a href="#" data-rel="popup" data-transition="pop" data-position-to="window" id="btn-submit" class="ui-btn ui-btn-b ui-corner-all mc-top-margin-1-5">로그인</a>'+
+									'<p class="mc-top-margin-1-5"><a href="begin-password-reset.html">ID/Password 찾기</a></p>'
+								);
+								$('#btn-submit').click(function(){
+									alert("로긴버튼클릭");
+   									id = $('#id').val();
+   									password = $('#password').val();
+   									member.login(id, password);
+   								});
+   							}
+   						}
+   					)
+   				}
+   			);
    		});
    <!--로그인-->
    		var member = {
 				login : function(id, password){
-   					$.ajax("http://192.168.0.121:9000/app/member/login",{
+   					$.ajax("http://fkod51.cafe24.com/member/login",{
    						data : {
    							'id': id,
    							'password': password
    							},
    						type :"post",
    						dataType : "json",
+   						async : false,
    						success : function(data) {
    							if(data != null){
-   								localStorage.setItem("id",$('#id').val());
-   								localStorage.setItem("password",$('#password').val());
+   								db.transaction(
+   									function(transaction) {
+   										transaction.executeSql(
+   											'INSERT INTO entries (id, password) VALUES (?,?);',
+   											[id, password]
+   										)
+   									}
+   								);
    								booking.book();
    							} else{
    								alert("아이디 패스워드를 다시한번 확인해주세요");
@@ -75,7 +110,7 @@
    		var booking = {
             book : function(id){
              var arr = [];
-   					$.getJSON('http://192.168.0.121:9000/app/movie/movie_info',function(data){
+   					$.getJSON('http://fkod51.cafe24.com/movie/movie_info',function(data){
    						var head ='<meta http-equiv="Content-Type" content="default-src';
    						 head += "'self'";
    						  head += 'data: gap: https://ssl.gstatic.com';
@@ -106,7 +141,7 @@
    					});
    				},
    				result : function(filmNumber){
-   					$.getJSON('http://192.168.0.121:9000/app/movie/movie_name/'+filmNumber,function(data){
+   					$.getJSON('http://fkod51.cafe24.com/movie/movie_name/'+filmNumber,function(data){
    					var head ='<meta http-equiv="Content-Type" content="default-src';
    						 head += "'self'";
    						  head += 'data: gap: https://ssl.gstatic.com';
@@ -130,8 +165,19 @@
    							location.href='booking.html';
    						});
    						$('#logout').click(function(){
-   							localStorage.clear();
-   							location.href='login.html';
+   							$.ajax("http://fkod51.cafe24.com/member/logout",{
+   								data : {},
+   								success : function(){
+									db.transaction(
+   										function(transaction) {
+   											transaction.executeSql(
+   												'DELETE FROM entries;'
+   											)
+   										}
+   									);
+   									location.href='login.html';
+   								}
+   							});
    						});
    					})
    				}
@@ -140,7 +186,7 @@
 		var Ticket={
 			select_movie : function(filmName){
 			console.log("select_movie 실행"+filmName);
-				$.ajax("http://192.168.0.121:9000/app/schedule/movieSelect" ,{
+				$.ajax("http://fkod51.cafe24.com/schedule/movieSelect" ,{
 					type : 'get',
 					data : {
 						movie : filmName
@@ -168,7 +214,7 @@
 			},
 			select_theater : function(filmName,theater){
 			console.log("select_theater 실행"+filmName+"  "+theater);
-				$.ajax("http://192.168.0.121:9000/app/schedule/theaterSelect" ,{
+				$.ajax("http://fkod51.cafe24.com/schedule/theaterSelect" ,{
 					type : 'get',
 					data : {
 						movie : filmName,
@@ -196,7 +242,7 @@
 			},
 			select_date : function(filmName,theater,date){
 			console.log("select_date 실행"+filmName+"  "+theater);
-				$.ajax("http://192.168.0.121:9000/app/schedule/dateSelect" ,{
+				$.ajax("http://fkod51.cafe24.com/schedule/dateSelect" ,{
 					type : 'get',
 					data : {
 						movie : filmName,
@@ -235,7 +281,7 @@
 			},
 			ticket_choiceseat : function(filmName,theater,date,time) {
 			alert(filmName+", "+theater+", "+date+", "+time);
-					$.ajax("http://192.168.0.121:9000/app/schedule/choiceseat" ,{
+					$.ajax("http://fkod51.cafe24.com/schedule/choiceseat" ,{
 						type : 'get',
 						data : {
 							movie : filmName,
@@ -263,7 +309,7 @@
 							});
 							$('#book').click(function() {
 								var ticket_data = data;
-								$.getJSON('http://192.168.0.121:9000/app/ticket/getId', function(dataId) {
+								$.getJSON('http://fkod51.cafe24.com/ticket/getId', function(dataId) {
 									alert("룸네임 : "+ticket_data.ticket.roomName+"시작시간 : "+ticket_data.ticket.startTime);
 									if (dataId.id!=null) {
 										Seats.book(ticket_data,dataId.id);
@@ -287,7 +333,7 @@
 				price : null,
 
 				initSeats : function(ticket_data) {
-					$.ajax('http://192.168.0.121:9000/app/schedule/initSeats', {
+					$.ajax('http://fkod51.cafe24.com/schedule/initSeats', {
 						type : 'get',
 						data : {
 							movie : ticket_data.movie,
@@ -475,50 +521,49 @@
 				},
 
 				book : function(info,mem_id) {
-					var movie = info.movie;
-					var date = info.date;
-					var time = info.time;
-					var filmNumber = info.ticket.filmNumber;
-					var theater = info.theater;
-					var roomName = info.ticket.roomName;
-					var startTime = info.ticket.startTime;
-					var id = mem_id;
-					alert(info+"  "+info.movie+""+info.ticket.filmNumber+"룸네임"+info.ticket.roomName+"날짜"+info.date+"시작시간"+info.ticket.startTime);
-					alert($('input:checkbox:checked').map(function() {return this.value;}).get().join(','));
-					$.ajax('http://192.168.0.121:9000/app/ticket/book',{
-						type : 'get',
-						data : {
-							id : id,
-							movie : movie,
-							date : date,
-							time : time,
-							filmNumber : filmNumber,
-							theater : theater,
-							roomName : roomName,
-							startTime : startTime,
-							adult : Number($("select[name=normal] option:selected").val()),
-							teenager : Number($("select[name=teenager] option:selected").val()),
-							old_man : Number($("select[name=treatment] option:selected").val()),
-							price :	Number($("select[name=normal] option:selected").val())*10000 + Number($("select[name=teenager] option:selected").val())*7000 + Number($("select[name=treatment] option:selected").val())*4000,
-							seat_number : $('input:checkbox:checked').map(function() {return this.value;}).get().join(',')
-						},
-						async : true,
-						dataType : 'json',
-						success : function(data) {
-							//location.href="${context}/ticket/Ticket.do?page=Confirm";
-							var confirm = '<div class="container"><div class="row"><div class="col-lg-12 text-center"><h2 class="margin-top-0 text-primary">예매가 성공적으로 완료되었습니다.</h2></div></div></div><div class="container"><div class="row"><div class="col-lg-12 text-center"><h4>예매번호 : '+data.ticketNumber+'</h4></div></div></div><div class="container"><div class="row"><div class="col-lg-12 text-center"><div><label id="continue" style="font-size: 20px">계속하기</label></div></div></div></div>';
-							$(confirm).appendTo($('#three').empty());
-							$('#continue').click(function() {
-								tabs.make();
-						    	Ticket.main();
-								Ticket.initList();
-								});
-						},
-						error : function(xhr, status, msg) {
-							alert('에러발생상태 : '+status+',내용:'+msg);
-						}
-					});
-				}
+               var movie = info.movie;
+               var date = info.date;
+               var time = info.time;
+               var filmNumber = info.ticket.filmNumber;
+               var theater = info.theater;
+               var roomName = info.ticket.roomName;
+               var startTime = info.ticket.startTime;
+               var id = mem_id;
+               alert(info+"  "+info.movie+""+info.ticket.filmNumber+"룸네임"+info.ticket.roomName+"날짜"+info.date+"시작시간"+info.ticket.startTime);
+               alert($('input:checkbox:checked').map(function() {return this.value;}).get().join(','));
+               $.ajax('http://fkod51.cafe24.com/ticket/book',{
+                  type : 'get',
+                  data : {
+                     id : id,
+                     movie : movie,
+                     date : date,
+                     time : time,
+                     filmNumber : filmNumber,
+                     theater : theater,
+                     roomName : roomName,
+                     startTime : startTime,
+                     adult : Number($("select[name=normal] option:selected").val()),
+                     teenager : Number($("select[name=teenager] option:selected").val()),
+                     old_man : Number($("select[name=treatment] option:selected").val()),
+                     price :   Number($("select[name=normal] option:selected").val())*10000 + Number($("select[name=teenager] option:selected").val())*7000 + Number($("select[name=treatment] option:selected").val())*4000,
+                     seat_number : $('input:checkbox:checked').map(function() {return this.value;}).get().join(',')
+                  },
+                  async : true,
+                  dataType : 'json',
+                  success : function(data) {
+                     var confirm = '<div class="container"><div class="row"><div class="col-lg-12 text-center"><h2 class="margin-top-0 text-primary">예매가 성공적으로 완료되었습니다.</h2></div></div></div><div class="container"><div class="row"><div class="col-lg-12 text-center"><h4>예매번호 : '+data.ticketNumber+'</h4></div></div></div><div class="container"><div class="row"><div class="col-lg-12 text-center"><div><label id="continue" style="font-size: 20px">계속하기</label></div></div></div></div>';
+                     $(confirm).appendTo($('#content').empty());
+                     $('#continue').click(function() {
+                         booking.book();
+                         //Ticket.main();
+                        //Ticket.initList();
+                        });
+                  },
+                  error : function(xhr, status, msg) {
+                     alert('에러발생상태 : '+status+',내용:'+msg);
+                  }
+               });
+            }
 		};
    	</script>
 </body>

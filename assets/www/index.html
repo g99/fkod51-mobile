@@ -49,10 +49,42 @@
         <script type="text/javascript" src="cordova.js"></script>
         <script type="text/javascript" src="js/index.js"></script>
         <script>
+            var db;
         	$(function(){
-        	    alert("인덱스페이지");
-        		location.href='html/main.html';
-        	});
+        	var shortName = "fkod";
+   			var version = "1.0";
+   			var displayName = "fkod";
+   			var maxSize = 65536;
+   			db = openDatabase(shortName, version, displayName, maxSize);
+   			db.transaction(
+   				function(transaction){
+   					transaction.executeSql(
+						'CREATE TABLE IF NOT EXISTS entries ' +
+						'(id TEXT NOT NULL PRIMARY KEY,' +
+						'	password TEXT NOT NULL);'
+   					)
+   				}
+   			);
+   			db.transaction(
+   				function(transaction) {
+   					transaction.executeSql(
+   						'SELECT * FROM entries;',[],
+   						function(transaction, result) {
+   							var row = result.rows.item(0);
+   							id = row.id;
+   							password = row.password;
+   							alert(id);
+   							alert(password);
+   							if(id != null && password != null) {
+   								member.login(id, password);
+   							} else {
+   							    location.href='html/login.html';
+   							}
+   						}
+   					)
+   				}
+   			);
+        });
         </script>
     </body>
 </html>
