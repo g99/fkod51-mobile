@@ -1,2 +1,2 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merger version="3"><dataSet config="debug"><source path="C:\fkod51-mobile-master\CordovaLib\build\intermediates\bundles\debug\assets"/></dataSet><dataSet config="main"><source path="C:\fkod51-mobile-master\CordovaLib\src\androidTest\assets"/></dataSet></merger>
+<merger version="3"><dataSet config="debug"><source path="C:\and\fkod51-mobile\CordovaLib\build\intermediates\bundles\debug\assets"/></dataSet><dataSet config="main"><source path="C:\and\fkod51-mobile\CordovaLib\src\androidTest\assets"/></dataSet></merger>

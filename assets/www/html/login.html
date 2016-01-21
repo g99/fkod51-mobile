@@ -5,9 +5,9 @@
 	<meta name="format-detection" content="telephone=no" charset="UTF-8">
 	<meta name="msapplication-tap-highlight" content="no">
 	<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
-	<link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
-	<script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
-	<script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+	<link rel="stylesheet" href="../css/jquery.mobile-1.4.5.min.css" />
+	<script src="../js/jquery-1.11.1.min.js"></script>
+	<script src="../js/jquery.mobile-1.4.5.min.js"></script>
 	<link rel="stylesheet" type="text/css" href="../css/ticket.css">
 	<title>템플릿</title>
 </head>
@@ -34,29 +34,40 @@
 </div><!-- /page -->
 <script>
    		$(function(){
+   			var id;
+   			var password;
+   			if(localStorage.id != null) {
+   				id = localStorage.id;
+   				password = localStorage.password;
+   				member.login(id, password);
+   			}
    			$('#btn-submit').click(function(){
-   				member.login();
+   				id = $('#id').val();
+   				password = $('#password').val();
+   				member.login(id, password);
    			});
    		});
    <!--로그인-->
    		var member = {
-				login : function(){
-   					var id = $('#id').val();
-   					var password = $('#password').val();
-   					$.ajax("http://fkod51.cafe24.com/member/login_mobile",{
-   						data : {'id':id, 'pw':password},
+				login : function(id, password){
+   					$.ajax("http://192.168.0.121:9000/app/member/login",{
+   						data : {
+   							'id': id,
+   							'password': password
+   							},
    						type :"post",
    						dataType : "json",
    						success : function(data) {
    							if(data != null){
-   								<!--location.href='booking.html';-->
-   								booking.book(id);
+   								localStorage.setItem("id",$('#id').val());
+   								localStorage.setItem("password",$('#password').val());
+   								booking.book();
    							} else{
    								alert("아이디 패스워드를 다시한번 확인해주세요");
    							}
    						},
    						error : function() {
-   							alert('상태 : '+status + ',메시지 : '+msg);
+   							alert("에이작스 실패");
    						}
    					});
                 }
@@ -64,14 +75,14 @@
    		var booking = {
             book : function(id){
              var arr = [];
-   					$.getJSON('http://fkod51.cafe24.com/movie/movie_info',function(data){
+   					$.getJSON('http://192.168.0.121:9000/app/movie/movie_info',function(data){
    						var head ='<meta http-equiv="Content-Type" content="default-src';
    						 head += "'self'";
    						  head += 'data: gap: https://ssl.gstatic.com';
    						   head +="'unsafe-eval'";
    						   head +='; style-src';
    						    head += "'self' 'unsafe-inline'; ";
-   						    head += 'media-src *"><meta name="format-detection" content="telephone=no" charset="UTF-8"><meta name="msapplication-tap-highlight" content="no"><meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width"><link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" /><script src="http://code.jquery.com/jquery-1.11.1.min.js"/><script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"/><title>티켓</title>';
+   						    head += 'media-src *"><meta name="format-detection" content="telephone=no" charset="UTF-8"><meta name="msapplication-tap-highlight" content="no"><meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width"><link rel="stylesheet" href="../css/jquery.mobile-1.4.5.min.css" /><script src="../js/jquery-1.11.1.min.js"/><script src="../js/jquery.mobile-1.4.5.min.js"/><title>티켓</title>';
    						var temp = '<ul data-role="listview" data-filter="true" data-filter-placeholder="Search movies.." data-inset="true" id="list"  data-theme="b">';
    						$.each(data.movieList, function(index, value){
    							temp +='<li><a href=# id="'+this.filmNumber+'">'+this.filmName+'</a></li>';
@@ -95,14 +106,14 @@
    					});
    				},
    				result : function(filmNumber){
-   					$.getJSON('http://fkod51.cafe24.com/movie/movie_name/'+filmNumber,function(data){
+   					$.getJSON('http://192.168.0.121:9000/app/movie/movie_name/'+filmNumber,function(data){
    					var head ='<meta http-equiv="Content-Type" content="default-src';
    						 head += "'self'";
    						  head += 'data: gap: https://ssl.gstatic.com';
    						   head +="'unsafe-eval'";
    						   head +='; style-src';
    						    head += "'self' 'unsafe-inline'; ";
-   						    head += 'media-src *"><meta name="format-detection" content="telephone=no" charset="UTF-8"><meta name="msapplication-tap-highlight" content="no"><meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width"><link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" /><script src="http://code.jquery.com/jquery-1.11.1.min.js"/><script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"/><title>티켓</title>';
+   						    head += 'media-src *"><meta name="format-detection" content="telephone=no" charset="UTF-8"><meta name="msapplication-tap-highlight" content="no"><meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width"><link rel="stylesheet" href="../css/jquery.mobile-1.4.5.min.css" /><script src="../js/jquery-1.11.1.min.js"/><script src="../js/jquery.mobile-1.4.5.min.js"/><title>티켓</title>';
    						var foo = '<div><div><img src="http://fkod51.cafe24.com/resources/images/'+data.filmNumber+'.jpg" style="width: 100%; height: 50%; "></div>'
    								+'<div style="margin : auto;"><h1>'+data.filmName+'</h1><h3>을 선택하셨습니다.</h3></div>'
    								+'<div><a href="#" id="reservation" class="ui-btn ui-shadow">예매하기</a><a href="#" id="cancel" class="ui-btn ui-shadow">예매취소</a>'
@@ -119,6 +130,7 @@
    							location.href='booking.html';
    						});
    						$('#logout').click(function(){
+   							localStorage.clear();
    							location.href='login.html';
    						});
    					})
@@ -128,7 +140,7 @@
 		var Ticket={
 			select_movie : function(filmName){
 			console.log("select_movie 실행"+filmName);
-				$.ajax("http://fkod51.cafe24.com/schedule/movieSelect" ,{
+				$.ajax("http://192.168.0.121:9000/app/schedule/movieSelect" ,{
 					type : 'get',
 					data : {
 						movie : filmName
@@ -156,7 +168,7 @@
 			},
 			select_theater : function(filmName,theater){
 			console.log("select_theater 실행"+filmName+"  "+theater);
-				$.ajax("http://fkod51.cafe24.com/schedule/theaterSelect" ,{
+				$.ajax("http://192.168.0.121:9000/app/schedule/theaterSelect" ,{
 					type : 'get',
 					data : {
 						movie : filmName,
@@ -184,7 +196,7 @@
 			},
 			select_date : function(filmName,theater,date){
 			console.log("select_date 실행"+filmName+"  "+theater);
-				$.ajax("http://fkod51.cafe24.com/schedule/dateSelect" ,{
+				$.ajax("http://192.168.0.121:9000/app/schedule/dateSelect" ,{
 					type : 'get',
 					data : {
 						movie : filmName,
@@ -223,7 +235,7 @@
 			},
 			ticket_choiceseat : function(filmName,theater,date,time) {
 			alert(filmName+", "+theater+", "+date+", "+time);
-					$.ajax("http://fkod51.cafe24.com/schedule/choiceseat" ,{
+					$.ajax("http://192.168.0.121:9000/app/schedule/choiceseat" ,{
 						type : 'get',
 						data : {
 							movie : filmName,
@@ -251,7 +263,7 @@
 							});
 							$('#book').click(function() {
 								var ticket_data = data;
-								$.getJSON('http://fkod51.cafe24.com/ticket/getId', function(dataId) {
+								$.getJSON('http://192.168.0.121:9000/app/ticket/getId', function(dataId) {
 									alert("룸네임 : "+ticket_data.ticket.roomName+"시작시간 : "+ticket_data.ticket.startTime);
 									if (dataId.id!=null) {
 										Seats.book(ticket_data,dataId.id);
@@ -275,7 +287,7 @@
 				price : null,
 
 				initSeats : function(ticket_data) {
-					$.ajax('http://fkod51.cafe24.com//schedule/initSeats', {
+					$.ajax('http://192.168.0.121:9000/app/schedule/initSeats', {
 						type : 'get',
 						data : {
 							movie : ticket_data.movie,
@@ -473,7 +485,7 @@
 					var id = mem_id;
 					alert(info+"  "+info.movie+""+info.ticket.filmNumber+"룸네임"+info.ticket.roomName+"날짜"+info.date+"시작시간"+info.ticket.startTime);
 					alert($('input:checkbox:checked').map(function() {return this.value;}).get().join(','));
-					$.ajax('http://fkod51.cafe24.com//ticket/book',{
+					$.ajax('http://192.168.0.121:9000/app/ticket/book',{
 						type : 'get',
 						data : {
 							id : id,
