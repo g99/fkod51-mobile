@@ -5,9 +5,9 @@
         <meta name="format-detection" content="telephone=no" charset="UTF-8">
         <meta name="msapplication-tap-highlight" content="no">
         <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
-        <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
-		<script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
-		<script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+        <link rel="stylesheet" href="../css/jquery.mobile-1.4.5.min.css" />
+		<script src="../js/jquery-1.11.1.min.js"></script>
+		<script src="../js/jquery.mobile-1.4.5.min.js"></script>
         <title>티켓</title>
     </head>
     <body>
@@ -18,8 +18,8 @@
 		</div><!-- /header -->
 <div  data-theme="b" id="frame" class="ticket_flex-item ticket_item1">
 
-</div>>
-	</div>>
+</div>
+	</div>
 
  	<script>
    		$(function(){
@@ -47,14 +47,9 @@
    						$('head').empty();
 						$('head').html(head);
    						$('#frame').html(temp);
-   						console.log("두번째 each문 직전")
    						$.each(data.movieList, function(index, value){
-   							console.log("인덱스"+index);
-   							console.log("두번째 each문 진입")
    							$('#'+arr[index]).click(function(){
-   								console.log("두번째 each문 들어옴");
    								booking.result(value.filmNumber);
-   								console.log("두번째 each문 들어옴"+value.filmNumber);
    							});
    						});
    					});

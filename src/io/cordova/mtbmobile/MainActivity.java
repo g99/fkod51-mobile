@@ -17,10 +17,11 @@
        under the License.
  */
 
-package io.cordova.hellocordova;
+package io.cordova.mtbmobile;
 
 import android.os.Bundle;
-import org.apache.cordova.*;
+
+import org.apache.cordova.CordovaActivity;
 
 public class MainActivity extends CordovaActivity
 {
