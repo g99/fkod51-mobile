@@ -3,7 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/CordovaLib/CordovaLib.iml" filepath="$PROJECT_DIR$/CordovaLib/CordovaLib.iml" />
-      <module fileurl="file://$PROJECT_DIR$/fkod51-mobile.iml" filepath="$PROJECT_DIR$/fkod51-mobile.iml" />
+      <module fileurl="file://$PROJECT_DIR$/fkod51-mobile2.iml" filepath="$PROJECT_DIR$/fkod51-mobile2.iml" />
     </modules>
   </component>
 </project>
