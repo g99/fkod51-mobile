@@ -136,20 +136,94 @@
    							});
    						});
    						$('#logout').click(function(){
-						$.ajax("http://fkod51.cafe24.com/member/logout",{
-							data : {},
-							success : function(){
-								db.transaction(
-									function(transaction) {
-										transaction.executeSql(
-											'DELETE FROM entries;'
-										)
-									}
-								);
-								location.href='login.html';
-							}
+							$.ajax("http://fkod51.cafe24.com/member/logout",{
+								data : {},
+								success : function(){
+									db.transaction(
+										function(transaction) {
+											transaction.executeSql(
+												'DELETE FROM entries;'
+											)
+										}
+									);
+									location.href='login.html';
+								}
+							});
 						});
-					});
+						$('#ticket_info').click(function(){
+							$.ajax("http://fkod51.cafe24.com/member/ticket_List",{
+								data : {},
+								success : function(data){
+									var count = 0;
+									var ticket_list = '<ul>';
+									$.each(data, function(index, value){
+										ticket_list += '<li><input type="radio" name="ticket" class="ticket" id="'+this.ticketNumber+'" value="'+count+'" style="display: none;"><label for="'+this.ticketNumber+'">'+this.filmName+'</label></li>';
+										count++;
+   									});
+   									ticket_list += '</ul>';
+   									ticket_list += '<a href="" class="ui-btn ui-shadow" id="home" style="margin-top:6px; width: 100px; margin-right: 18px; border-radius: 10px; float: left;">메인으로</a>';
+   									$('#content').empty();
+									$('#content').html(ticket_list);
+									$('#home').click(function(){
+												booking.book();
+											});
+									$('.ticket').click(function(){
+										$.getJSON("http://fkod51.cafe24.com/member/my_Ticket/"+$("input:radio[name=ticket]:checked").val(), function(data) {
+											var ticket = '<h2 class="text-center" style="text-align: center;">예매 상세페이지</h2>'
+											+'<hr />'
+											+'<div class="col-lg-10 col-lg-offset-1 text-center" style="text-align: center;">'
+												+'<form class="contact-form row">'
+													+'<div class="col-md-4">'
+															+'<input type="text" value="'+data.filmName+'"id="my_FilmName" readonly="readonly" style="color: black;">'
+														+'<div style="height:12px;"></div>'
+												   +'</div>'
+													+'<div class="col-md-4">'
+															+'<input type="text" value="'+data.ticketNumber+'"id="my_TicketNumber" readonly="readonly" style="color: black;">'
+														+'<div style="height:12px;"></div>'
+												   +'</div>'
+														+'<div class="col-md-4">'
+															+'<label></label>'
+															+'<input type="text" class="form-control" value="강남" id="my_Ticket_Location" readonly="readonly" style="color: black;">'
+														+'<div style="height:12px;"></div>'
+														+'</div>'
+														+'<div class="col-md-4">'
+														   +'<label></label>'
+														   +'<input type="text" class="form-control" value="'+data.roomName+'" id="my_Ticket_RoomName" readonly="readonly" style="color: black;">'
+														+'<div style="height:12px;"></div>'
+														+'</div>'
+														+'<div class="col-md-4">'
+															+'<label></label>'
+															+'<input type="text" class="form-control" value="'+data.seatNumber+'" id="my_Ticket_SeatNumber" readonly="readonly" style="color: black;">'
+														+'<div style="height:12px;"></div>'
+														+'</div>'
+														+'<div class="col-md-4">'
+															+'<label></label>'
+															+'<input type="text" class="form-control" value="'+data.date+'" id="my_Ticket_Date" readonly="readonly" style="color: black;">'
+															+'<div style="height:12px;"></div>'
+														+'</div>'
+														+'<div class="col-md-4">'
+															+'<label></label>'
+															+'<input type="text" class="form-control" value="'+data.startTime+'" id="my_Ticket_StartTime" readonly="readonly" style="color: black;">'
+															+'<div style="height:12px;"></div>'
+														+'</div>'
+														+'<a href="" class="ui-btn ui-shadow" id="home" style="margin-top:6px; width: 100px; margin-left: 18px; border-radius: 10px; float: left;">메인으로</a>'
+														+'<a href="" class="ui-btn ui-shadow" id="cancel" style="margin-top:6px; width: 100px; margin-right: 18px; border-radius: 10px; float: right;">예매취소</a>'
+												+'</form>'
+											+'</div>'
+											$('#content').empty();
+											$('#content').html(ticket);
+											$('#cancel').click(function(){
+												Seats.cancel(data.ticketNumber);
+												booking.book();
+											});
+											$('#home').click(function(){
+												booking.book();
+											});
+										});
+									});
+								}
+							});
+						});
    					});
    				},
    				result : function(filmNumber){
@@ -305,7 +379,6 @@
 							$('#book').click(function() {
 								var ticket_data = data;
 								$.getJSON('http://fkod51.cafe24.com/ticket/getId', function(dataId) {
-									//alert("룸네임 : "+ticket_data.ticket.roomName+"시작시간 : "+ticket_data.ticket.startTime);
 									if (dataId.id!=null) {
 										Seats.book(ticket_data,dataId.id);
 									} else {
@@ -556,7 +629,25 @@
                      alert("통신 상태를 점검하고 원활한 환경에서 다시 접속해주세요.");
                   }
                });
-            }
+            },
+			cancel : function(ticketNumber) {
+					$.ajax("http://fkod51.cafe24.com/ticket/cancel",{
+        				data : {ticketNumber : ticketNumber},
+        				dataType : "json",
+        				type : 'get',
+        				success : function(data) {
+        					if(data.result == "success"){
+        						alert("예매가 취소되었습니다.");
+        					}
+        					if(data.result == "fail"){
+        						alert("예매취소를 실패하였습니다. 다시 시도해주세요.");
+        					}
+        				},
+        				error : function(xhr, status, msg) {
+        					alert('에러발생, 다시 시도해주세요. 다시 시도하셔도 에러가 발생하면 관리자에게 문의해주세요.');
+        				}
+        			});
+				}
 		};
    	</script>
 </body>
